@@ -2,6 +2,10 @@ from django.contrib import admin
 
 from .models import Cliente, Paquete
 
+admin.site.site_header = "MuveBox · Administración"
+admin.site.site_title = "MuveBox Admin"
+admin.site.index_title = "Panel de gestión de paquetería"
+
 
 @admin.register(Cliente)
 class ClienteAdmin(admin.ModelAdmin):

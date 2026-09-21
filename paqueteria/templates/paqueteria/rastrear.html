@@ -1,36 +1,35 @@
 {% extends "base.html" %}
+{% load paqueteria_extras %}
 {% block title %}Rastrear paquete · MuveBox{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body p-4">
-                <h4 class="card-title">Rastrear mi paquete</h4>
-                <p class="text-muted">Ingresa el código de seguimiento que recibiste (ej. MUV-A1B2C3). No necesitas iniciar sesión.</p>
-                <form method="post" class="d-flex gap-2">
-                    {% csrf_token %}
-                    {{ form.codigo_seguimiento }}
-                    <button type="submit" class="btn btn-dark">Buscar</button>
-                </form>
-            </div>
-        </div>
-
-        {% if buscado %}
-            {% if paquete %}
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5>Código: {{ paquete.codigo_seguimiento }}</h5>
-                    <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-secondary">{{ paquete.get_estado_display }}</span></p>
-                    <p class="mb-1"><strong>Descripción:</strong> {{ paquete.descripcion }}</p>
-                    <p class="mb-1"><strong>Destino:</strong> {{ paquete.direccion_entrega }}</p>
-                    <p class="mb-0 text-muted small">Última actualización: {{ paquete.fecha_actualizacion }}</p>
-                </div>
-            </div>
-            {% else %}
-            <div class="alert alert-warning">No encontramos ningún paquete con ese código.</div>
-            {% endif %}
-        {% endif %}
+<div style="max-width:560px;margin:0 auto;">
+    <div class="mb-card mb-card-soft mb-mb-lg">
+        <h1 class="mb-heading" style="font-size:1.35rem;">{% icon 'search' 20 %} Rastrear mi paquete</h1>
+        <p class="mb-muted" style="margin-bottom:18px;">Ingresa el código que recibiste (ej. MUV-A1B2C3). No necesitas iniciar sesión.</p>
+        <form method="post" class="mb-flex mb-gap-sm">
+            {% csrf_token %}
+            {{ form.codigo_seguimiento }}
+            <button type="submit" class="mb-btn mb-btn-primary">Buscar</button>
+        </form>
     </div>
+
+    {% if buscado %}
+        {% if paquete %}
+        <div class="mb-card mb-card-soft">
+            <div class="mb-section-head">
+                <h2 class="mb-heading mb-mt-0" style="font-size:1.1rem;">{{ paquete.codigo_seguimiento }}</h2>
+                <span class="mb-pill {{ paquete.estado|estado_clase }}">{% estado_icon paquete.estado 13 %} {{ paquete.get_estado_display }}</span>
+            </div>
+            <dl class="mb-dl">
+                <dt>Descripción</dt><dd>{{ paquete.descripcion }}</dd>
+                <dt>Destino</dt><dd>{{ paquete.direccion_entrega }}</dd>
+                <dt>Última actualización</dt><dd class="mb-muted">{{ paquete.fecha_actualizacion }}</dd>
+            </dl>
+        </div>
+        {% else %}
+        <div class="mb-alert mb-alert-warning">{% icon 'x-circle' 17 %} No encontramos ningún paquete con ese código.</div>
+        {% endif %}
+    {% endif %}
 </div>
 {% endblock %}

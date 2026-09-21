@@ -1,42 +1,38 @@
 {% extends "base.html" %}
+{% load paqueteria_extras %}
 {% block title %}Clientes · MuveBox{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Clientes</h4>
-    <a href="{% url 'paqueteria:cliente_create' %}" class="btn btn-dark btn-sm">+ Nuevo cliente</a>
+<div class="mb-section-head">
+    <h1 class="mb-heading mb-mt-0" style="font-size:1.4rem;">Clientes</h1>
+    <a href="{% url 'paqueteria:cliente_create' %}" class="mb-btn mb-btn-dark">{% icon 'plus' 16 %} Nuevo cliente</a>
 </div>
 
-<form method="get" class="mb-3">
-    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por nombre o email">
+<form method="get" class="mb-filters">
+    <input type="text" name="q" value="{{ query }}" class="mb-input" placeholder="Buscar por nombre o email" style="min-width:280px;">
+    <button type="submit" class="mb-btn mb-btn-ghost">Buscar</button>
 </form>
 
-<div class="table-responsive">
-    <table class="table table-striped bg-white shadow-sm align-middle">
+<div class="mb-table-wrap">
+    <table class="mb-table">
         <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Teléfono</th>
-                <th>Registrado</th>
-                <th class="text-end">Acciones</th>
-            </tr>
+            <tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Registrado</th><th></th></tr>
         </thead>
         <tbody>
             {% for cliente in clientes %}
             <tr>
-                <td>{{ cliente.nombre }}</td>
+                <td class="mb-flex mb-gap-sm">{% icon 'user' 16 %} {{ cliente.nombre }}</td>
                 <td>{{ cliente.email }}</td>
                 <td>{{ cliente.telefono|default:"—" }}</td>
-                <td>{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
-                <td class="text-end">
-                    <a href="{% url 'paqueteria:cliente_detail' cliente.pk %}" class="btn btn-sm btn-outline-dark">Ver</a>
-                    <a href="{% url 'paqueteria:cliente_update' cliente.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                    <a href="{% url 'paqueteria:cliente_delete' cliente.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                <td class="mb-muted">{{ cliente.fecha_registro|date:"d/m/Y" }}</td>
+                <td class="mb-table-actions">
+                    <a href="{% url 'paqueteria:cliente_detail' cliente.pk %}" class="mb-btn mb-btn-ghost mb-btn-sm">{% icon 'eye' 14 %}</a>
+                    <a href="{% url 'paqueteria:cliente_update' cliente.pk %}" class="mb-btn mb-btn-ghost mb-btn-sm">{% icon 'edit' 14 %}</a>
+                    <a href="{% url 'paqueteria:cliente_delete' cliente.pk %}" class="mb-btn mb-btn-danger mb-btn-sm">{% icon 'trash' 14 %}</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="text-center text-muted">No hay clientes registrados todavía.</td></tr>
+            <tr><td colspan="5" class="mb-empty">No hay clientes registrados todavía.</td></tr>
             {% endfor %}
         </tbody>
     </table>

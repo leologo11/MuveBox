@@ -1,46 +1,30 @@
 {% extends "base.html" %}
+{% load paqueteria_extras %}
 {% block title %}{{ paquete.codigo_seguimiento }} · MuveBox{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Paquete {{ paquete.codigo_seguimiento }}</h4>
-    <div>
-        <a href="{% url 'paqueteria:paquete_update' paquete.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-        <a href="{% url 'paqueteria:paquete_delete' paquete.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-        <a href="{% url 'paqueteria:paquete_list' %}" class="btn btn-sm btn-outline-secondary">Volver</a>
+<div class="mb-section-head">
+    <div class="mb-flex mb-gap-sm">
+        <h1 class="mb-heading mb-mt-0" style="font-size:1.4rem;">{{ paquete.codigo_seguimiento }}</h1>
+        <span class="mb-pill {{ paquete.estado|estado_clase }}">{% estado_icon paquete.estado 13 %} {{ paquete.get_estado_display }}</span>
+    </div>
+    <div class="mb-flex mb-gap-sm">
+        <a href="{% url 'paqueteria:paquete_update' paquete.pk %}" class="mb-btn mb-btn-ghost mb-btn-sm">{% icon 'edit' 14 %} Editar</a>
+        <a href="{% url 'paqueteria:paquete_delete' paquete.pk %}" class="mb-btn mb-btn-danger mb-btn-sm">{% icon 'trash' 14 %} Eliminar</a>
+        <a href="{% url 'paqueteria:paquete_list' %}" class="mb-btn mb-btn-ghost mb-btn-sm">Volver</a>
     </div>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body">
-        <dl class="row mb-0">
-            <dt class="col-sm-3">Estado</dt>
-            <dd class="col-sm-9"><span class="badge bg-secondary">{{ paquete.get_estado_display }}</span></dd>
-
-            <dt class="col-sm-3">Remitente</dt>
-            <dd class="col-sm-9">{{ paquete.remitente.nombre }} ({{ paquete.remitente.email }})</dd>
-
-            <dt class="col-sm-3">Destinatario</dt>
-            <dd class="col-sm-9">{{ paquete.destinatario.nombre }} ({{ paquete.destinatario.email }})</dd>
-
-            <dt class="col-sm-3">Descripción</dt>
-            <dd class="col-sm-9">{{ paquete.descripcion }}</dd>
-
-            <dt class="col-sm-3">Peso</dt>
-            <dd class="col-sm-9">{{ paquete.peso_kg }} kg</dd>
-
-            <dt class="col-sm-3">Dirección de entrega</dt>
-            <dd class="col-sm-9">{{ paquete.direccion_entrega }}</dd>
-
-            <dt class="col-sm-3">Notas</dt>
-            <dd class="col-sm-9">{{ paquete.notas|default:"—" }}</dd>
-
-            <dt class="col-sm-3">Creado</dt>
-            <dd class="col-sm-9">{{ paquete.fecha_creacion }}</dd>
-
-            <dt class="col-sm-3">Última actualización</dt>
-            <dd class="col-sm-9">{{ paquete.fecha_actualizacion }}</dd>
-        </dl>
-    </div>
+<div class="mb-card mb-card-soft">
+    <dl class="mb-dl">
+        <dt>Remitente</dt><dd>{{ paquete.remitente.nombre }} <span class="mb-muted">({{ paquete.remitente.email }})</span></dd>
+        <dt>Destinatario</dt><dd>{{ paquete.destinatario.nombre }} <span class="mb-muted">({{ paquete.destinatario.email }})</span></dd>
+        <dt>Descripción</dt><dd>{{ paquete.descripcion }}</dd>
+        <dt>Peso</dt><dd>{{ paquete.peso_kg }} kg</dd>
+        <dt>Dirección de entrega</dt><dd>{{ paquete.direccion_entrega }}</dd>
+        <dt>Notas</dt><dd>{{ paquete.notas|default:"—" }}</dd>
+        <dt>Creado</dt><dd class="mb-muted">{{ paquete.fecha_creacion }}</dd>
+        <dt>Última actualización</dt><dd class="mb-muted">{{ paquete.fecha_actualizacion }}</dd>
+    </dl>
 </div>
 {% endblock %}

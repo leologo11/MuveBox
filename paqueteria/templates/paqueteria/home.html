@@ -1,81 +1,69 @@
 {% extends "base.html" %}
-{% block title %}Inicio · MuveBox{% endblock %}
+{% load paqueteria_extras %}
+{% block title %}MuveBox · Paquetería{% endblock %}
 
 {% block content %}
-<div class="p-4 mb-4 bg-dark text-white rounded-3">
-    <h1 class="display-6">MuveBox 📦</h1>
-    <p class="lead mb-0">Sistema simple de gestión y rastreo de paquetería.</p>
-</div>
+<section class="mb-hero">
+    <div class="mb-hero-text">
+        <span class="mb-eyebrow">Seguimiento en tiempo real</span>
+        <h1>Tu paquete, siempre a la vista.</h1>
+        <p>Ingresa tu código de seguimiento y entérate al instante en qué va tu envío.</p>
+        <form method="post" action="{% url 'paqueteria:rastrear' %}" class="mb-track-form">
+            {% csrf_token %}
+            <input type="text" name="codigo_seguimiento" class="mb-input" placeholder="Ej: MUV-A1B2C3" required>
+            <button type="submit" class="mb-btn mb-btn-primary">{% icon 'search' 17 %} Rastrear</button>
+        </form>
+    </div>
+    <div class="mb-hero-art">{% icon 'box' 130 %}</div>
+</section>
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <div class="fs-3 fw-bold">{{ resumen.total }}</div>
-                <div class="text-muted small">Total paquetes</div>
-            </div>
-        </div>
+<div class="mb-stats">
+    <div class="mb-stat">
+        <span class="mb-stat-icon">{% icon 'package-search' 20 %}</span>
+        <div><div class="mb-stat-value">{{ resumen.total }}</div><div class="mb-stat-label">Total paquetes</div></div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <div class="fs-3 fw-bold text-warning">{{ resumen.pendientes }}</div>
-                <div class="text-muted small">Pendientes</div>
-            </div>
-        </div>
+    <div class="mb-stat is-pending">
+        <span class="mb-stat-icon">{% icon 'clock' 20 %}</span>
+        <div><div class="mb-stat-value">{{ resumen.pendientes }}</div><div class="mb-stat-label">Pendientes</div></div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <div class="fs-3 fw-bold text-primary">{{ resumen.en_transito }}</div>
-                <div class="text-muted small">En tránsito</div>
-            </div>
-        </div>
+    <div class="mb-stat is-transit">
+        <span class="mb-stat-icon">{% icon 'truck' 20 %}</span>
+        <div><div class="mb-stat-value">{{ resumen.en_transito }}</div><div class="mb-stat-label">En tránsito</div></div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <div class="fs-3 fw-bold text-success">{{ resumen.entregados }}</div>
-                <div class="text-muted small">Entregados</div>
-            </div>
-        </div>
+    <div class="mb-stat is-delivered">
+        <span class="mb-stat-icon">{% icon 'check-circle' 20 %}</span>
+        <div><div class="mb-stat-value">{{ resumen.entregados }}</div><div class="mb-stat-label">Entregados</div></div>
     </div>
 </div>
 
 {% if user.is_authenticated %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0">Últimos paquetes registrados</h5>
-    <a href="{% url 'paqueteria:paquete_create' %}" class="btn btn-dark btn-sm">+ Nuevo paquete</a>
+<div class="mb-section-head">
+    <h2 class="mb-heading mb-mt-0" style="font-size:1.15rem;">Últimos paquetes registrados</h2>
+    <a href="{% url 'paqueteria:paquete_create' %}" class="mb-btn mb-btn-dark mb-btn-sm">{% icon 'plus' 15 %} Nuevo paquete</a>
 </div>
-<div class="table-responsive">
-    <table class="table table-striped bg-white shadow-sm">
+<div class="mb-table-wrap">
+    <table class="mb-table">
         <thead>
-            <tr>
-                <th>Código</th>
-                <th>Remitente</th>
-                <th>Destinatario</th>
-                <th>Estado</th>
-                <th></th>
-            </tr>
+            <tr><th>Código</th><th>Remitente</th><th>Destinatario</th><th>Estado</th><th></th></tr>
         </thead>
         <tbody>
             {% for paquete in ultimos_paquetes %}
             <tr>
-                <td>{{ paquete.codigo_seguimiento }}</td>
+                <td><strong>{{ paquete.codigo_seguimiento }}</strong></td>
                 <td>{{ paquete.remitente }}</td>
                 <td>{{ paquete.destinatario }}</td>
-                <td><span class="badge bg-secondary">{{ paquete.get_estado_display }}</span></td>
-                <td><a href="{% url 'paqueteria:paquete_detail' paquete.pk %}" class="btn btn-sm btn-outline-dark">Ver</a></td>
+                <td><span class="mb-pill {{ paquete.estado|estado_clase }}">{% estado_icon paquete.estado 13 %} {{ paquete.get_estado_display }}</span></td>
+                <td class="mb-table-actions"><a href="{% url 'paqueteria:paquete_detail' paquete.pk %}" class="mb-btn mb-btn-ghost mb-btn-sm">{% icon 'eye' 14 %} Ver</a></td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" class="text-center text-muted">Aún no hay paquetes. Prueba el comando de datos de ejemplo.</td></tr>
+            <tr><td colspan="5" class="mb-empty">Aún no hay paquetes. Prueba <code>python manage.py seed_data</code>.</td></tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
 {% else %}
-<div class="alert alert-info">
-    ¿Eres parte del equipo MuveBox? <a href="{% url 'login' %}">Inicia sesión</a> para gestionar paquetes y clientes.
+<div class="mb-alert mb-alert-info">
+    <span>¿Eres parte del equipo MuveBox? <a href="{% url 'login' %}">Inicia sesión</a> para gestionar paquetes y clientes.</span>
 </div>
 {% endif %}
 {% endblock %}
