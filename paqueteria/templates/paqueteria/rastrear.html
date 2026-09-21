@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Rastrear paquete · MuveBox{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h4 class="card-title">Rastrear mi paquete</h4>
+                <p class="text-muted">Ingresa el código de seguimiento que recibiste (ej. MUV-A1B2C3). No necesitas iniciar sesión.</p>
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    {{ form.codigo_seguimiento }}
+                    <button type="submit" class="btn btn-dark">Buscar</button>
+                </form>
+            </div>
+        </div>
+
+        {% if buscado %}
+            {% if paquete %}
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5>Código: {{ paquete.codigo_seguimiento }}</h5>
+                    <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-secondary">{{ paquete.get_estado_display }}</span></p>
+                    <p class="mb-1"><strong>Descripción:</strong> {{ paquete.descripcion }}</p>
+                    <p class="mb-1"><strong>Destino:</strong> {{ paquete.direccion_entrega }}</p>
+                    <p class="mb-0 text-muted small">Última actualización: {{ paquete.fecha_actualizacion }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">No encontramos ningún paquete con ese código.</div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

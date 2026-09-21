@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ cliente.nombre }} · MuveBox{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">{{ cliente.nombre }}</h4>
+    <div>
+        <a href="{% url 'paqueteria:cliente_update' cliente.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="{% url 'paqueteria:cliente_delete' cliente.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+        <a href="{% url 'paqueteria:cliente_list' %}" class="btn btn-sm btn-outline-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ cliente.email }}</dd>
+            <dt class="col-sm-3">Teléfono</dt>
+            <dd class="col-sm-9">{{ cliente.telefono|default:"—" }}</dd>
+            <dt class="col-sm-3">Dirección</dt>
+            <dd class="col-sm-9">{{ cliente.direccion|default:"—" }}</dd>
+            <dt class="col-sm-3">Registrado</dt>
+            <dd class="col-sm-9">{{ cliente.fecha_registro }}</dd>
+        </dl>
+    </div>
+</div>
+
+<h6>Paquetes enviados</h6>
+<ul class="list-group mb-4">
+    {% for p in cliente.paquetes_enviados.all %}
+    <li class="list-group-item d-flex justify-content-between">
+        <a href="{% url 'paqueteria:paquete_detail' p.pk %}">{{ p.codigo_seguimiento }}</a>
+        <span class="badge bg-secondary">{{ p.get_estado_display }}</span>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Sin envíos registrados.</li>
+    {% endfor %}
+</ul>
+
+<h6>Paquetes recibidos</h6>
+<ul class="list-group">
+    {% for p in cliente.paquetes_recibidos.all %}
+    <li class="list-group-item d-flex justify-content-between">
+        <a href="{% url 'paqueteria:paquete_detail' p.pk %}">{{ p.codigo_seguimiento }}</a>
+        <span class="badge bg-secondary">{{ p.get_estado_display }}</span>
+    </li>
+    {% empty %}
+    <li class="list-group-item text-muted">Sin paquetes recibidos.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

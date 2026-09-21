@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Paquetes · MuveBox{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Paquetes</h4>
+    <a href="{% url 'paqueteria:paquete_create' %}" class="btn btn-dark btn-sm">+ Nuevo paquete</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto flex-grow-1">
+        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Buscar por código, descripción o cliente">
+    </div>
+    <div class="col-auto">
+        <select name="estado" class="form-select">
+            <option value="">Todos los estados</option>
+            {% for valor, etiqueta in estados %}
+            <option value="{{ valor }}" {% if valor == estado %}selected{% endif %}>{{ etiqueta }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-dark">Filtrar</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped bg-white shadow-sm align-middle">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Remitente</th>
+                <th>Destinatario</th>
+                <th>Peso (kg)</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paquete in paquetes %}
+            <tr>
+                <td>{{ paquete.codigo_seguimiento }}</td>
+                <td>{{ paquete.remitente }}</td>
+                <td>{{ paquete.destinatario }}</td>
+                <td>{{ paquete.peso_kg }}</td>
+                <td><span class="badge bg-secondary">{{ paquete.get_estado_display }}</span></td>
+                <td>{{ paquete.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                <td class="text-end">
+                    <a href="{% url 'paqueteria:paquete_detail' paquete.pk %}" class="btn btn-sm btn-outline-dark">Ver</a>
+                    <a href="{% url 'paqueteria:paquete_update' paquete.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <a href="{% url 'paqueteria:paquete_delete' paquete.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted">No hay paquetes que coincidan con la búsqueda.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

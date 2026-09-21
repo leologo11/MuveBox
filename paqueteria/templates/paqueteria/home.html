@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Inicio · MuveBox{% endblock %}
+
+{% block content %}
+<div class="p-4 mb-4 bg-dark text-white rounded-3">
+    <h1 class="display-6">MuveBox 📦</h1>
+    <p class="lead mb-0">Sistema simple de gestión y rastreo de paquetería.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">{{ resumen.total }}</div>
+                <div class="text-muted small">Total paquetes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="fs-3 fw-bold text-warning">{{ resumen.pendientes }}</div>
+                <div class="text-muted small">Pendientes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="fs-3 fw-bold text-primary">{{ resumen.en_transito }}</div>
+                <div class="text-muted small">En tránsito</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <div class="fs-3 fw-bold text-success">{{ resumen.entregados }}</div>
+                <div class="text-muted small">Entregados</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Últimos paquetes registrados</h5>
+    <a href="{% url 'paqueteria:paquete_create' %}" class="btn btn-dark btn-sm">+ Nuevo paquete</a>
+</div>
+<div class="table-responsive">
+    <table class="table table-striped bg-white shadow-sm">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Remitente</th>
+                <th>Destinatario</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for paquete in ultimos_paquetes %}
+            <tr>
+                <td>{{ paquete.codigo_seguimiento }}</td>
+                <td>{{ paquete.remitente }}</td>
+                <td>{{ paquete.destinatario }}</td>
+                <td><span class="badge bg-secondary">{{ paquete.get_estado_display }}</span></td>
+                <td><a href="{% url 'paqueteria:paquete_detail' paquete.pk %}" class="btn btn-sm btn-outline-dark">Ver</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">Aún no hay paquetes. Prueba el comando de datos de ejemplo.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info">
+    ¿Eres parte del equipo MuveBox? <a href="{% url 'login' %}">Inicia sesión</a> para gestionar paquetes y clientes.
+</div>
+{% endif %}
+{% endblock %}
