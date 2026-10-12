@@ -1,0 +1,105 @@
+### MuveBox API - peticiones de prueba
+### Abrir en VS Code con la extensión "REST Client" y pulsar "Send Request" sobre cada bloque.
+### Primero ejecutar "login": las demás peticiones toman el token de esa respuesta.
+
+@base = http://127.0.0.1:8000/api/v1
+
+### Raíz de la API (pública)
+GET {{base}}/
+
+### Sin token -> 401
+GET {{base}}/paquetes/
+
+### Login -> 200 con access y refresh
+# @name login
+POST {{base}}/auth/token/
+Content-Type: application/json
+
+{"username": "admin", "password": "admin1234"}
+
+###
+@access = {{login.response.body.access}}
+@refresh = {{login.response.body.refresh}}
+
+### Usuario actual
+GET {{base}}/auth/me/
+Authorization: Bearer {{access}}
+
+### Listar clientes
+GET {{base}}/clientes/?page_size=5
+Authorization: Bearer {{access}}
+
+### Buscar clientes
+GET {{base}}/clientes/?search=ana&ordering=-fecha_registro
+Authorization: Bearer {{access}}
+
+### Crear cliente -> 201
+POST {{base}}/clientes/
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"nombre": "Camila Reyes", "email": "camila.reyes@example.com", "telefono": "+56 9 5555 1234"}
+
+### Detalle de cliente
+GET {{base}}/clientes/1/
+Authorization: Bearer {{access}}
+
+### Modificar parcialmente cliente
+PATCH {{base}}/clientes/1/
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"direccion": "Av. Providencia 1234, Santiago"}
+
+### Paquetes de un cliente
+GET {{base}}/clientes/1/paquetes/
+Authorization: Bearer {{access}}
+
+### Listar paquetes en tránsito
+GET {{base}}/paquetes/?estado=EN_TRANSITO
+Authorization: Bearer {{access}}
+
+### Crear paquete -> 201
+POST {{base}}/paquetes/
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"remitente": 1, "destinatario": 2, "descripcion": "Caja de libros", "peso_kg": "2.50", "direccion_entrega": "Los Aromos 456, Ñuñoa"}
+
+### Crear paquete inválido -> 400
+POST {{base}}/paquetes/
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"remitente": 1, "destinatario": 1, "descripcion": "Mal", "peso_kg": "-5", "direccion_entrega": "X"}
+
+### Cambiar estado de un paquete
+PATCH {{base}}/paquetes/1/
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"estado": "ENTREGADO"}
+
+### Resumen por estado
+GET {{base}}/paquetes/resumen/
+Authorization: Bearer {{access}}
+
+### Eliminar paquete (solo staff) -> 204
+DELETE {{base}}/paquetes/1/
+Authorization: Bearer {{access}}
+
+### Rastreo público (cambiar por un código real) -> 200 sin token
+GET {{base}}/rastreo/MUV-XXXXXX/
+
+### Renovar token
+POST {{base}}/auth/token/refresh/
+Content-Type: application/json
+
+{"refresh": "{{refresh}}"}
+
+### Cerrar sesión -> 204
+POST {{base}}/auth/logout/
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"refresh": "{{refresh}}"}

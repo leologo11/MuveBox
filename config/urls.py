@@ -6,7 +6,9 @@ The `urlpatterns` list routes URLs to views. For more information please see:
 """
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import include, path
+from django.urls import include, path, re_path
+
+from paqueteria.api.views import RutaNoEncontradaView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -16,5 +18,8 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    # API RESTful versionada (Unidad 3)
+    path("api/v1/", include("paqueteria.api.urls")),
+    re_path(r"^api/", RutaNoEncontradaView.as_view()),
     path("", include("paqueteria.urls")),
 ]

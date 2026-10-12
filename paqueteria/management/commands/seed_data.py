@@ -1,3 +1,4 @@
+import os
 import random
 
 from django.contrib.auth import get_user_model
@@ -29,11 +30,14 @@ class Command(BaseCommand):
         fake = Faker("es_CL")
         User = get_user_model()
 
-        if not User.objects.filter(username="admin").exists():
-            User.objects.create_superuser("admin", "admin@muvebox.local", "admin1234")
-            self.stdout.write(self.style.SUCCESS("Superusuario creado -> admin / admin1234"))
+        # Credenciales de desarrollo: se pueden cambiar desde .env sin tocar el código.
+        usuario = os.environ.get("SEED_ADMIN_USER", "admin")
+        clave = os.environ.get("SEED_ADMIN_PASSWORD", "admin1234")
+        if not User.objects.filter(username=usuario).exists():
+            User.objects.create_superuser(usuario, "admin@muvebox.local", clave)
+            self.stdout.write(self.style.SUCCESS(f"Superusuario creado -> {usuario} / {clave}"))
         else:
-            self.stdout.write("Superusuario 'admin' ya existía, se omite.")
+            self.stdout.write(f"Superusuario '{usuario}' ya existía, se omite.")
 
         clientes = []
         for _ in range(options["clientes"]):
@@ -68,4 +72,4 @@ class Command(BaseCommand):
             creados += 1
 
         self.stdout.write(self.style.SUCCESS(f"Paquetes creados en esta ejecución: {creados}"))
-        self.stdout.write(self.style.SUCCESS("Listo. Ejecuta 'python manage.py runserver' y entra con admin/admin1234"))
+        self.stdout.write(self.style.SUCCESS(f"Listo. Ejecuta 'python manage.py runserver' y entra con el usuario '{usuario}'"))

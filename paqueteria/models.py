@@ -1,4 +1,4 @@
-import random
+import secrets
 import string
 
 from django.db import models
@@ -7,7 +7,10 @@ from django.urls import reverse
 
 def generar_codigo_seguimiento():
     """Genera un código único tipo MUV-A1B2C3 para rastrear el paquete."""
-    sufijo = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    # secrets (y no random): el código permite consultar el paquete sin iniciar
+    # sesión, así que no debe ser predecible.
+    alfabeto = string.ascii_uppercase + string.digits
+    sufijo = "".join(secrets.choice(alfabeto) for _ in range(6))
     return f"MUV-{sufijo}"
 
 

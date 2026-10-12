@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 from dotenv import load_dotenv
 
@@ -26,13 +29,18 @@ load_dotenv(BASE_DIR / ".env")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY", "django-insecure-y4+1#m0)q*(mn)inbf(9l@)og(&%kh@yrz$+@pr9%6lyzzhtsn"
-)
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "True") == "True"
+
+# SECURITY WARNING: keep the secret key used in production secret!
+# La SECRET_KEY también firma los tokens JWT de la API: si se filtra, cualquiera
+# puede fabricar tokens válidos. Por eso solo se acepta la clave de respaldo en
+# modo desarrollo; con DEBUG=False el proyecto no arranca sin una clave propia.
+SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured("Define SECRET_KEY en el archivo .env (obligatoria con DEBUG=False).")
+    SECRET_KEY = "django-insecure-y4+1#m0)q*(mn)inbf(9l@)og(&%kh@yrz$+@pr9%6lyzzhtsn"
 
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
 
@@ -46,6 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # API RESTful (Unidad 3)
+    'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'paqueteria',
 ]
 
@@ -142,3 +153,76 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# ---------------------------------------------------------------------------
+# Django REST Framework (Unidad 3: API RESTful)
+# https://www.django-rest-framework.org/api-guide/settings/
+# ---------------------------------------------------------------------------
+
+REST_FRAMEWORK = {
+    # Autenticación: JWT para clientes de la API. La sesión de Django solo se
+    # agrega en desarrollo, para poder usar la API navegable desde el navegador.
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        *(['rest_framework.authentication.SessionAuthentication'] if DEBUG else []),
+    ],
+    # Seguro por defecto: todo endpoint exige autenticación salvo que la vista
+    # declare explícitamente lo contrario (login y rastreo público).
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # Solo JSON. La API navegable (HTML) queda disponible únicamente con DEBUG.
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        *(['rest_framework.renderers.BrowsableAPIRenderer'] if DEBUG else []),
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'paqueteria.api.pagination.PaginacionEstandar',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    # Límite de peticiones: frena fuerza bruta en el login y abuso del rastreo.
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/hour',
+        'user': '1000/hour',
+        'login': '5/min',
+        'rastreo': '30/min',
+    },
+    'EXCEPTION_HANDLER': 'paqueteria.api.exceptions.manejador_errores',
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+}
+
+# JWT (djangorestframework-simplejwt)
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+SIMPLE_JWT = {
+    # Access token corto: si se roba, sirve pocos minutos.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    # Cada refresh entrega un refresh nuevo e invalida el anterior (lista negra),
+    # así un refresh token robado no se puede reutilizar indefinidamente.
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Cabeceras y cookies seguras. Solo se activan fuera de desarrollo, porque en
+# local se trabaja sobre HTTP y forzar HTTPS dejaría el sitio inaccesible.
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
